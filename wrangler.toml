@@ -17,8 +17,8 @@ fallthrough = true
 [[d1_databases]]
 binding = "DB"
 database_name = "portfolio-db"
-# `npx wrangler d1 create portfolio-db` 실행 후 출력되는 id 로 바꾸세요.
-database_id = "00000000-0000-0000-0000-000000000000"
+# audreaming.com 에 배포된 D1 데이터베이스 id (새 계정에 배포하려면 `npx wrangler d1 create portfolio-db` 결과로 바꾸세요)
+database_id = "c80b0c07-c7ec-44be-b1c5-fc1b180bdb8a"
 migrations_dir = "migrations"
 
 [[r2_buckets]]
