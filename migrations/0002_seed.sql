@@ -50,9 +50,9 @@ INSERT INTO settings (key, value) VALUES
 ### 수상 · 교육
 - [수상 내역 또는 교육 이수]');
 
--- CAD 설계 프로젝트 (예시 자리)
+-- 프로젝트: CAD 설계 (예시 자리)
 INSERT INTO posts (slug, category, code, title, summary, body_md, tools, year, badge, sort_order) VALUES
-('cad-project-1', 'cad', 'DWG-001', '[CAD 프로젝트 1 제목]',
+('cad-project-1', 'project', 'DWG-001', '[CAD 프로젝트 1 제목]',
  '예) 1단 평기어 감속기 설계. ==요구 감속비에서 출발해== 모듈, 잇수, 축 지름을 정하고 3D 모델과 부품도까지 작성했습니다.',
  '## 설계 목표
 
@@ -72,22 +72,22 @@ INSERT INTO posts (slug, category, code, title, summary, body_md, tools, year, b
 - ++간섭 검사++에서 [발견한 문제]를 고쳤습니다.
 - !!다음엔 공차를 더 꼼꼼히!!',
  '[툴]', '[연도]', 'BEST ★', 1),
-('cad-project-2', 'cad', 'DWG-002', '[CAD 프로젝트 2 제목]',
+('cad-project-2', 'project', 'DWG-002', '[CAD 프로젝트 2 제목]',
  '예) 지그·고정구 설계. 가공 공정을 고려해 ==m:공차와 끼워맞춤==을 지정하고, 조립도와 부품표(BOM)를 정리했습니다.',
  '## 설계 목표
 
 [내용을 적어주세요]',
  '[툴]', '[연도]', '', 2),
-('cad-project-3', 'cad', 'DWG-003', '[CAD 프로젝트 3 제목]',
+('cad-project-3', 'project', 'DWG-003', '[CAD 프로젝트 3 제목]',
  '예) 기구 메커니즘 모델링. ==p:조립 구속과 간섭 검사==로 동작 범위를 확인하고, 시제품 제작을 위한 출력 파일을 준비했습니다.',
  '## 설계 목표
 
 [내용을 적어주세요]',
  '[툴]', '[연도]', '', 3);
 
--- 소프트웨어 · 임베디드 (GitHub 저장소)
+-- 프로젝트: GitHub 저장소
 INSERT INTO posts (slug, category, code, title, summary, body_md, tools, year, repo_url, pen_note, sort_order) VALUES
-('gear-design-assistant', 'software', 'S-01', 'Gear Design Assistant',
+('gear-design-assistant', 'project', 'S-01', 'Gear Design Assistant',
  '기어 설계 계산을 돕는 프로그램. ==m:기계설계 지식을 코드로 옮긴== 대표 프로젝트',
  '## 왜 만들었나
 
@@ -109,26 +109,45 @@ INSERT INTO posts (slug, category, code, title, summary, body_md, tools, year, r
 
 !!다음 목표: 강도 검토까지 자동화!!',
  '설계 × SW', '2026', 'https://github.com/khw1566/Gear-Design-Assistant-Program', '★ 대표작, 꼭 보기!', 1),
-('esp32-mini-web-server', 'software', 'S-02', 'ESP32 Mini Web Server',
+('esp32-mini-web-server', 'project', 'S-02', 'ESP32 Mini Web Server',
  'ESP32로 만든 소형 웹서버. [기능 한 줄 설명]',
  '## 개요
 
 [내용을 적어주세요]', '임베디드', '2026', 'https://github.com/khw1566/ESP32-miniWebServer-Project', '', 2),
-('lab-qr-access', 'software', 'S-03', 'Lab QR Access',
+('lab-qr-access', 'project', 'S-03', 'Lab QR Access',
  'QR 코드 기반 실습실 출입 관리. [기능 한 줄 설명]',
  '## 개요
 
 [내용을 적어주세요]', '웹 · 시스템', '2026', 'https://github.com/khw1566/lab-qr-access', '', 3),
-('fc-simulation', 'software', 'S-04', 'FC Simulation',
+('fc-simulation', 'project', 'S-04', 'FC Simulation',
  '[시뮬레이션 대상과 목적 한 줄 설명]',
  '## 개요
 
 [내용을 적어주세요]', '시뮬레이션', '2026', 'https://github.com/khw1566/FC_Simulation', '', 4),
-('usb-cam-app', 'software', 'S-05', 'USB CAM APP',
+('usb-cam-app', 'project', 'S-05', 'USB CAM APP',
  'USB 카메라 활용 앱. [기능 한 줄 설명]',
  '## 개요
 
 [내용을 적어주세요]', '앱', '2026', 'https://github.com/khw1566/USB-CAM-APP', '', 5);
+
+-- 미니 프로젝트 (심심풀이로 가볍게 만든 것)
+INSERT INTO posts (slug, category, code, title, summary, body_md, tools, year, repo_url, sort_order) VALUES
+('nopeeking-app', 'project', 'M-01', 'NoPeeking APP',
+ '[한 줄 설명]', '[내용을 적어주세요]', '앱', '2026', 'https://github.com/khw1566/NoPeeking-APP', 10),
+('ai-quota-ring', 'project', 'M-02', 'AI Quota Ring',
+ '[한 줄 설명]', '[내용을 적어주세요]', '[분류]', '2026', 'https://github.com/khw1566/AI-quota-ring', 11);
+
+-- 분야(fields)와 규모(scale). 저장소 이름만 보고 추측해서 넣었으니 관리자 페이지에서 고쳐 주세요.
+-- 분야 키: 3d=3D 설계, circuit=회로 설계, kinematics=기구학, embedded=임베디드, web=웹, mobile=모바일 앱, aero=항공
+UPDATE posts SET fields = '3d,kinematics' WHERE slug IN ('cad-project-1', 'cad-project-3');
+UPDATE posts SET fields = '3d' WHERE slug = 'cad-project-2';
+UPDATE posts SET fields = 'kinematics' WHERE slug = 'gear-design-assistant';
+UPDATE posts SET fields = 'embedded,web' WHERE slug = 'esp32-mini-web-server';
+UPDATE posts SET fields = 'web' WHERE slug = 'lab-qr-access';
+UPDATE posts SET fields = 'aero' WHERE slug = 'fc-simulation';
+UPDATE posts SET fields = 'mobile', scale = 'mini' WHERE slug IN ('usb-cam-app', 'nopeeking-app');
+UPDATE posts SET scale = 'mini' WHERE slug = 'ai-quota-ring';
+UPDATE posts SET code = 'M-03' WHERE slug = 'usb-cam-app';
 
 -- 설계 노트 (블로그 글)
 INSERT INTO posts (slug, category, title, summary, body_md, tools, year, sort_order) VALUES

@@ -4,13 +4,14 @@ import adminHtml from './admin.html';
 import loginHtml from './login.html';
 import { homePage, postPage, lockedPage, notFoundPage } from './render.js';
 import { renderMarkdown } from './markdown.js';
+import { FIELDS, SCALES, parseFields } from './fields.js';
 import { checkPassword, makeSessionCookie, clearSessionCookie, isLoggedIn, hasSession, quizMatches } from './auth.js';
 
-const POST_FIELDS = ['slug', 'category', 'code', 'title', 'summary', 'body_md', 'cover_url', 'tools', 'year', 'repo_url', 'badge', 'pen_note', 'sort_order', 'published', 'audience'];
+const POST_FIELDS = ['slug', 'category', 'fields', 'scale', 'code', 'title', 'summary', 'body_md', 'cover_url', 'tools', 'year', 'repo_url', 'badge', 'pen_note', 'sort_order', 'published', 'audience'];
 
 // 인사담당자 퀴즈를 통과해야 보이는 설정값 (이 목록에 없는 값은 모두에게 보입니다)
 const PRIVATE_KEYS = ['quiz_answer', 'name', 'email', 'phone', 'school', 'graduation', 'certificates', 'about', 'about_note', 'resume_md'];
-const CATEGORIES = ['cad', 'software', 'note'];
+const CATEGORIES = ['project', 'note'];
 const IMAGE_TYPES = { 'image/png': 'png', 'image/jpeg': 'jpg', 'image/gif': 'gif', 'image/webp': 'webp', 'image/svg+xml': 'svg', 'application/pdf': 'pdf' };
 const MAX_UPLOAD = 20 * 1024 * 1024; // 20MB
 
@@ -88,6 +89,8 @@ function cleanPost(input) {
   }
   if ('category' in p && !CATEGORIES.includes(p.category)) throw new Error('분류가 올바르지 않습니다.');
   if ('title' in p && !String(p.title).trim()) throw new Error('제목을 입력해 주세요.');
+  if ('fields' in p) p.fields = parseFields(Array.isArray(p.fields) ? p.fields.join(',') : p.fields).join(',');
+  if ('scale' in p && !SCALES.some((x) => x.key === p.scale)) throw new Error('규모가 올바르지 않습니다.');
   if ('sort_order' in p) p.sort_order = Number(p.sort_order) || 0;
   if ('published' in p) p.published = p.published ? 1 : 0;
   if ('audience' in p && !['public', 'hr'].includes(p.audience)) throw new Error('공개 범위가 올바르지 않습니다.');
@@ -101,7 +104,7 @@ async function handleAdminApi(request, env, url) {
 
   if (path === '/posts' && method === 'GET') {
     const { results } = await env.DB.prepare(
-      'SELECT id, slug, category, code, title, published, audience, sort_order, updated_at FROM posts ORDER BY category, sort_order, id'
+      'SELECT id, slug, category, fields, scale, code, title, published, audience, sort_order, updated_at FROM posts ORDER BY category, sort_order, id'
     ).all();
     return json(results);
   }
@@ -230,7 +233,15 @@ export default {
       }
 
       if (request.method !== 'GET' && request.method !== 'HEAD') return new Response('Method not allowed', { status: 405 });
-      const view = { hr: await canSeeHr(request, env), quizError: url.searchParams.get('hr') === 'fail', path };
+      const field = url.searchParams.get('field');
+      const scale = url.searchParams.get('scale');
+      const view = {
+        hr: await canSeeHr(request, env),
+        quizError: url.searchParams.get('hr') === 'fail',
+        path,
+        field: FIELDS.some((f) => f.key === field) ? field : '',
+        scale: SCALES.some((x) => x.key === scale) ? scale : '',
+      };
       return await handlePublic(request, env, url, view);
     } catch (e) {
       console.error(e);

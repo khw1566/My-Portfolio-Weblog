@@ -2,8 +2,11 @@
 CREATE TABLE posts (
   id          INTEGER PRIMARY KEY AUTOINCREMENT,
   slug        TEXT NOT NULL UNIQUE,              -- 주소에 쓰이는 이름 (예: gear-design)
-  category    TEXT NOT NULL DEFAULT 'note'       -- cad | software | note
-              CHECK (category IN ('cad', 'software', 'note')),
+  category    TEXT NOT NULL DEFAULT 'note'       -- project = 프로젝트 / note = 설계 노트(블로그 글)
+              CHECK (category IN ('project', 'note')),
+  fields      TEXT NOT NULL DEFAULT '',          -- 분야, 쉼표로 여러 개 (3d,circuit,kinematics,embedded,web,mobile,aero)
+  scale       TEXT NOT NULL DEFAULT 'normal'     -- normal = 일반 / mini = 미니(가볍게 만든 것)
+              CHECK (scale IN ('normal', 'mini')),
   code        TEXT NOT NULL DEFAULT '',          -- 도면번호 스타일 표기 (예: DWG-001, S-01)
   title       TEXT NOT NULL,
   summary     TEXT NOT NULL DEFAULT '',          -- 카드/목록에 보이는 한두 줄 소개

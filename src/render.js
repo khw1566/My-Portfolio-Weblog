@@ -1,6 +1,7 @@
 // 공개 페이지 HTML 을 만드는 함수들
 // view = { hr: 인사담당자 모드 여부, quizError: 퀴즈 오답 여부, path: 현재 주소 }
 import { renderMarkdown, renderInline, plainText } from './markdown.js';
+import { FIELDS, SCALES, FIELD_LABEL, parseFields } from './fields.js';
 
 export function esc(s) {
   return String(s ?? '')
@@ -59,10 +60,9 @@ ${view.hr ? `<div class="hr-bar"><span>${LOCK_SVG} 인사담당자 모드 · 이
 <a class="logo" href="/">${esc(siteName(s))} / ${esc(s.site_title || 'PORTFOLIO')}</a>
 <nav class="site-nav" aria-label="주요 메뉴">
 <a href="/#hire">00 소개</a>
-<a href="/#cad">01 CAD 설계</a>
-<a href="/#code">02 소프트웨어</a>
-<a href="/#posts">03 기록</a>
-${view.hr ? '<a href="/#resume">04 이력서</a>' : '<a href="/#hr">인사담당자 열람</a>'}
+<a href="/#projects">01 프로젝트</a>
+<a href="/#posts">02 기록</a>
+${view.hr ? '<a href="/#resume">03 이력서</a>' : '<a href="/#hr">인사담당자 열람</a>'}
 </nav>
 </header>
 ${body}
@@ -91,7 +91,12 @@ ${view.quizError ? '<p class="quiz-error" role="alert"><span class="pen">앗, �
 </form>`;
 }
 
-function cadCard(p) {
+const fieldTags = (p) => {
+  const fs = parseFields(p.fields);
+  return fs.length ? `<span class="field-tags">${fs.map((f) => `<span class="field-tag">${esc(FIELD_LABEL[f])}</span>`).join('')}</span>` : '';
+};
+
+function projectCard(p) {
   const img = p.cover_url
     ? `<img src="${esc(safeUrl(p.cover_url))}" alt="" loading="lazy">`
     : '[대표 이미지]';
@@ -99,22 +104,51 @@ function cadCard(p) {
 ${p.badge ? `<span class="sticky">${esc(p.badge)}</span>` : ''}
 <div class="card-img">${img}</div>
 <div class="card-body">
+${fieldTags(p)}
 <h3>${renderInline(p.title)} ${hrTag(p)}</h3>
+${p.pen_note ? `<span class="pen card-pen">${esc(p.pen_note)}</span>` : ''}
 <p>${renderInline(p.summary)}</p>
 </div>
 <div class="card-meta"><span>${esc(p.code)}</span><span>${esc(p.tools)}</span><span>${esc(p.year)}</span></div>
 </a>`;
 }
 
-function swRow(p, i) {
-  const code = i === 0 ? `<span class="circle">${esc(p.code)}${CIRCLE_SVG}</span>` : esc(p.code);
+function miniRow(p) {
+  const code = p.badge ? `<span class="circle">${esc(p.code)}${CIRCLE_SVG}</span>` : esc(p.code);
   const repo = safeUrl(p.repo_url);
   return `<tr>
 <td class="sw-code">${code}</td>
 <td class="sw-title"><a href="/posts/${esc(p.slug)}">${renderInline(p.title)}</a> ${hrTag(p)}${p.pen_note ? `<span class="pen">${esc(p.pen_note)}</span>` : ''}</td>
 <td class="sw-desc">${renderInline(p.summary)}${repo ? `<br><a class="repo" href="${esc(repo)}">GitHub →</a>` : ''}</td>
-<td class="sw-kind">${esc(p.tools)}</td>
+<td class="sw-kind">${fieldTags(p) || esc(p.tools)}</td>
 </tr>`;
+}
+
+/** 분야 · 규모 필터 (링크로 동작해서 자바스크립트 없이도 됩니다) */
+function filterBar(projects, view) {
+  const href = (field, scale) => {
+    const q = new URLSearchParams();
+    if (field) q.set('field', field);
+    if (scale) q.set('scale', scale);
+    const qs = q.toString();
+    return `/${qs ? '?' + qs : ''}#projects`;
+  };
+  const inScale = projects.filter((p) => !view.scale || p.scale === view.scale);
+  const inField = projects.filter((p) => !view.field || parseFields(p.fields).includes(view.field));
+  const chip = (label, count, url, on) =>
+    count === 0 && !on
+      ? `<span class="chip chip-off" aria-disabled="true">${esc(label)} <span class="chip-n">0</span></span>`
+      : `<a class="chip" href="${url}"${on ? ' aria-current="true"' : ''}>${esc(label)} <span class="chip-n">${count}</span></a>`;
+  return `<nav class="filters" aria-label="프로젝트 필터">
+<div class="filter-row"><span class="filter-label">분야</span>
+${chip('전체', inScale.length, href('', view.scale), !view.field)}
+${FIELDS.map((f) => chip(f.label, inScale.filter((p) => parseFields(p.fields).includes(f.key)).length, href(f.key, view.scale), view.field === f.key)).join('')}
+</div>
+<div class="filter-row"><span class="filter-label">규모</span>
+${chip('전체', inField.length, href(view.field, ''), !view.scale)}
+${SCALES.map((x) => chip(x.label, inField.filter((p) => p.scale === x.key).length, href(view.field, x.key), view.scale === x.key)).join('')}
+</div>
+</nav>`;
 }
 
 function noteItem(p) {
@@ -136,8 +170,10 @@ ${github ? `<dt>GITHUB</dt><dd><a href="${esc(github)}">${esc(github.replace(/^h
 }
 
 export function homePage(s, posts, view) {
-  const cad = posts.filter((p) => p.category === 'cad');
-  const sw = posts.filter((p) => p.category === 'software');
+  const projects = posts.filter((p) => p.category === 'project');
+  const shown = projects.filter((p) => (!view.field || parseFields(p.fields).includes(view.field)) && (!view.scale || p.scale === view.scale));
+  const shownNormal = shown.filter((p) => p.scale !== 'mini');
+  const shownMini = shown.filter((p) => p.scale === 'mini');
   const notes = posts.filter((p) => p.category === 'note');
   const github = safeUrl(s.github);
   const empty = (msg) => `<p class="empty">${msg}</p>`;
@@ -161,7 +197,7 @@ export function homePage(s, posts, view) {
 ${s.hero_note ? `<p class="pen hero-note">${esc(s.hero_note)}</p>` : ''}
 <p class="hero-desc">${renderInline(s.hero_desc)}</p>
 <div class="btns">
-<a class="btn btn-dark" href="#cad">프로젝트 보기</a>
+<a class="btn btn-dark" href="#projects">프로젝트 보기</a>
 ${github ? `<a class="btn" href="${esc(github)}">GitHub</a>` : ''}
 </div>
 </div>
@@ -192,27 +228,24 @@ ${contactList(s, github)}
 </div>
 </section>
 
-<section id="cad" class="section">
+<section id="projects" class="section">
 <div class="section-head">
-<h2><span class="section-no">01</span>${underlined('CAD 설계 프로젝트')}${s.cad_note ? `<span class="pen">${esc(s.cad_note)}</span>` : ''}</h2>
-</div>
-${cad.length ? `<div class="cards">${cad.map(cadCard).join('')}</div>` : empty('아직 CAD 프로젝트가 없습니다.')}
-</section>
-
-<section id="code" class="section">
-<div class="section-head">
-<h2><span class="section-no">02</span>${underlined('소프트웨어 · 임베디드')}</h2>
+<h2><span class="section-no">01</span>${underlined('프로젝트')}${s.cad_note ? `<span class="pen">${esc(s.cad_note)}</span>` : ''}</h2>
 ${github ? `<a class="more" href="${esc(github)}">${esc(github.replace(/^https?:\/\//, ''))} →</a>` : ''}
 </div>
-${sw.length ? `<div class="table-box"><table class="sw-table">
-<thead><tr><th scope="col">NO.</th><th scope="col">프로젝트</th><th scope="col">설명</th><th scope="col">분류</th></tr></thead>
-<tbody>${sw.map(swRow).join('')}</tbody>
-</table></div>` : empty('아직 소프트웨어 프로젝트가 없습니다.')}
+${filterBar(projects, view)}
+${shownNormal.length ? `<div class="cards">${shownNormal.map(projectCard).join('')}</div>` : ''}
+${shownMini.length ? `<div class="mini-head"><h3>미니 프로젝트</h3><span class="pen">심심풀이로 가볍게 만든 것들</span></div>
+<div class="table-box"><table class="sw-table">
+<thead><tr><th scope="col">NO.</th><th scope="col">프로젝트</th><th scope="col">설명</th><th scope="col">분야</th></tr></thead>
+<tbody>${shownMini.map(miniRow).join('')}</tbody>
+</table></div>` : ''}
+${!shownNormal.length && !shownMini.length ? empty('이 조건에 맞는 프로젝트가 아직 없습니다.') : ''}
 </section>
 
 <section id="posts" class="section">
 <div class="section-head">
-<h2><span class="section-no">03</span><mark class="hl">설계 노트</mark></h2>
+<h2><span class="section-no">02</span><mark class="hl">설계 노트</mark></h2>
 </div>
 ${notes.length ? `<div class="notes">${notes.map(noteItem).join('')}</div>` : empty('아직 글이 없습니다.')}
 </section>
@@ -220,7 +253,7 @@ ${notes.length ? `<div class="notes">${notes.map(noteItem).join('')}</div>` : em
 ${view.hr
     ? `<section id="resume" class="about">
 <div class="about-text">
-<h2><span class="section-no">04</span> ${underlined('이력서')}</h2>
+<h2><span class="section-no">03</span> ${underlined('이력서')}</h2>
 <p>${renderInline(s.about)}</p>
 ${s.about_note ? `<p class="pen">${esc(s.about_note)}</p>` : ''}
 ${contactList(s, github)}
@@ -229,7 +262,7 @@ ${contactList(s, github)}
 </section>`
     : `<section class="about about-locked">
 <div class="about-text">
-<h2><span class="section-no">04</span> ${underlined('이력서')} <span class="hr-tag">HR 전용</span></h2>
+<h2><span class="section-no">03</span> ${underlined('이력서')} <span class="hr-tag">HR 전용</span></h2>
 <p>학력·경력·자격증과 연락처는 인사담당자분께만 공개하고 있습니다.</p>
 <p><a class="btn" href="#hr">${LOCK_SVG}&nbsp;퀴즈 풀고 열람하기</a></p>
 </div>
@@ -244,13 +277,15 @@ ${contactList(s, github)}
   });
 }
 
-const CATEGORY_LABEL = { cad: 'CAD 설계', software: '소프트웨어 · 임베디드', note: '설계 노트' };
-const CATEGORY_ANCHOR = { cad: 'cad', software: 'code', note: 'posts' };
+const CATEGORY_LABEL = { project: '프로젝트', note: '설계 노트' };
+const CATEGORY_ANCHOR = { project: 'projects', note: 'posts' };
 
 export function postPage(s, p, view) {
   const repo = safeUrl(p.repo_url);
   const rows = [
     p.code && ['NO.', esc(p.code)],
+    p.category === 'project' && ['FIELD', esc(parseFields(p.fields).map((f) => FIELD_LABEL[f]).join(' · ') || '—')],
+    p.category === 'project' && ['SCALE', p.scale === 'mini' ? '미니' : '일반'],
     p.tools && ['TOOLS', esc(p.tools)],
     p.year && ['DATE', esc(p.year)],
     repo && ['REPO', `<a href="${esc(repo)}">${esc(repo.replace(/^https?:\/\/(www\.)?github\.com\//, ''))}</a>`],

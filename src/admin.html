@@ -53,6 +53,8 @@ body { background-image: none; }
 .cheat { font-size: 13px; color: var(--ink-soft); line-height: 1.9; }
 .cheat code { font-family: var(--mono); background: #E9E7DF; padding: 1px 5px; }
 [hidden] { display: none !important; }
+#field-boxes .chip:has(input:checked) { background: var(--ink); color: var(--paper); }
+#field-boxes input { width: 16px; height: 16px; }
 </style>
 </head>
 <body>
@@ -74,16 +76,21 @@ body { background-image: none; }
 <section id="panel-posts" class="layout">
 <div class="list">
 <button class="btn btn-dark" type="button" id="new-post">+ 새 글 쓰기</button>
-<div><h2>01 CAD 설계</h2><ul id="list-cad"></ul></div>
-<div><h2>02 소프트웨어 · 임베디드</h2><ul id="list-software"></ul></div>
-<div><h2>03 설계 노트</h2><ul id="list-note"></ul></div>
+<div><h2>01 프로젝트</h2><ul id="list-project"></ul></div>
+<div><h2>02 설계 노트</h2><ul id="list-note"></ul></div>
 </div>
 
 <form class="editor" id="post-form" autocomplete="off">
 <div class="fields">
 <div class="field wide"><label for="f-title">제목</label><input id="f-title" name="title" required></div>
 <div class="field"><label for="f-category">분류</label>
-<select id="f-category" name="category"><option value="cad">CAD 설계</option><option value="software">소프트웨어 · 임베디드</option><option value="note">설계 노트</option></select></div>
+<select id="f-category" name="category"><option value="project">프로젝트</option><option value="note">설계 노트 (블로그 글)</option></select></div>
+<div class="field"><label for="f-scale">규모</label>
+<select id="f-scale" name="scale"><option value="normal">일반 (큰 카드)</option><option value="mini">미니 (가볍게 만든 것, 표로 표시)</option></select></div>
+<fieldset class="field wide" id="f-fields" style="border: 0; padding: 0; margin: 0">
+<legend style="font-family: var(--mono); font-size: 12px; color: var(--ink-soft); margin-bottom: 6px">분야 (여러 개 선택 가능)</legend>
+<div class="row" id="field-boxes"></div>
+</fieldset>
 <div class="field"><label for="f-slug">주소 (영문/숫자/-)</label><input id="f-slug" name="slug" required placeholder="gear-reducer"><span class="hint" id="slug-hint"></span></div>
 <div class="field"><label for="f-code">번호 (예: DWG-004, S-06)</label><input id="f-code" name="code"></div>
 <div class="field"><label for="f-tools">툴 / 분류 태그</label><input id="f-tools" name="tools" placeholder="SolidWorks"></div>
@@ -91,8 +98,8 @@ body { background-image: none; }
 <div class="field"><label for="f-sort">순서 (작을수록 앞)</label><input id="f-sort" name="sort_order" type="number"></div>
 <div class="field wide"><label for="f-summary">한두 줄 소개 (카드·목록에 표시)</label><textarea id="f-summary" name="summary" rows="2"></textarea></div>
 <div class="field"><label for="f-repo">GitHub 주소</label><input id="f-repo" name="repo_url" placeholder="https://github.com/khw1566/..."></div>
-<div class="field"><label for="f-badge">포스트잇 문구 (CAD 카드)</label><input id="f-badge" name="badge" placeholder="BEST ★"></div>
-<div class="field"><label for="f-pen">펜 메모 (소프트웨어 표)</label><input id="f-pen" name="pen_note" placeholder="★ 대표작, 꼭 보기!"></div>
+<div class="field"><label for="f-badge">포스트잇 문구 (카드 위)</label><input id="f-badge" name="badge" placeholder="BEST ★"></div>
+<div class="field"><label for="f-pen">펜 메모 (제목 아래)</label><input id="f-pen" name="pen_note" placeholder="★ 대표작, 꼭 보기!"></div>
 <div class="field"><label for="f-audience">공개 범위</label>
 <select id="f-audience" name="audience"><option value="public">모든 방문자</option><option value="hr">인사담당자만 (퀴즈 통과)</option></select></div>
 <div class="field check"><input id="f-published" name="published" type="checkbox"><label for="f-published">게시하기 (끄면 임시저장)</label></div>
@@ -219,7 +226,7 @@ body { background-image: none; }
   // ----- 글 목록 -----
   async function loadList() {
     const posts = await api('/posts');
-    for (const cat of ['cad', 'software', 'note']) {
+    for (const cat of ['project', 'note']) {
       const ul = $('#list-' + cat);
       ul.replaceChildren();
       for (const p of posts.filter((x) => x.category === cat)) {
@@ -234,7 +241,7 @@ body { background-image: none; }
         title.style.flex = '1';
         title.textContent = p.title.replace(/==(?:[ymp]:)?|\+\+|!!/g, '');
         b.append(code, title);
-        for (const [on, label] of [[!p.published, '임시'], [p.audience === 'hr', 'HR']]) {
+        for (const [on, label] of [[p.scale === 'mini', '미니'], [!p.published, '임시'], [p.audience === 'hr', 'HR']]) {
           if (!on) continue;
           const d = document.createElement('span');
           d.className = 'draft';
@@ -248,13 +255,37 @@ body { background-image: none; }
     }
   }
 
+  // 분야 체크박스 (목록은 서버의 src/fields.js 와 같게 유지)
+  const FIELDS = [['3d', '3D 설계'], ['circuit', '회로 설계'], ['kinematics', '기구학'], ['embedded', '임베디드'], ['web', '웹'], ['mobile', '모바일 앱'], ['aero', '항공']];
+  for (const [key, label] of FIELDS) {
+    const l = document.createElement('label');
+    l.className = 'chip';
+    l.style.cursor = 'pointer';
+    const c = document.createElement('input');
+    c.type = 'checkbox';
+    c.value = key;
+    c.dataset.field = '1';
+    l.append(c, ' ' + label);
+    $('#field-boxes').append(l);
+  }
+  const fieldBoxes = () => [...document.querySelectorAll('input[data-field]')];
+  function toggleProjectFields() {
+    const isProject = $('#f-category').value === 'project';
+    $('#f-fields').hidden = !isProject;
+    $('#f-scale').closest('.field').hidden = !isProject;
+  }
+  $('#f-category').addEventListener('change', toggleProjectFields);
+
   function fill(p) {
+    const fs = String(p.fields || '').split(',');
+    fieldBoxes().forEach((c) => (c.checked = fs.includes(c.value)));
     for (const el of form.elements) {
       if (!el.name) continue;
       if (el.type === 'checkbox') el.checked = !!p[el.name];
       else el.value = p[el.name] ?? '';
     }
     updateCover();
+    toggleProjectFields();
     $('#delete-post').hidden = !p.id;
     $('#view-link').hidden = !p.id;
     $('#view-link').href = '/posts/' + encodeURIComponent(p.slug || '');
@@ -274,7 +305,7 @@ body { background-image: none; }
   function newPost() {
     if (dirty && !confirm('저장하지 않은 내용이 있습니다. 새 글을 쓸까요?')) return;
     current = null;
-    fill({ category: 'note', audience: 'public', published: 1, sort_order: 0, year: new Date().toISOString().slice(0, 7).replace('-', '.') });
+    fill({ category: 'project', scale: 'normal', fields: '', audience: 'public', published: 1, sort_order: 0, year: new Date().toISOString().slice(0, 7).replace('-', '.') });
     loadList();
     $('#f-title').focus();
   }
@@ -297,6 +328,7 @@ body { background-image: none; }
       if (!el.name) continue;
       data[el.name] = el.type === 'checkbox' ? el.checked : el.value;
     }
+    data.fields = fieldBoxes().filter((c) => c.checked).map((c) => c.value).join(',');
     try {
       if (current === null) {
         const r = await api('/posts', { method: 'POST', body: JSON.stringify(data) });
