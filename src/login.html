@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>관리자 로그인</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+KR:wght@400;500;700&family=Nanum+Pen+Script&display=swap">
+<link rel="stylesheet" href="/styles.css">
+<style>
+.login { max-width: 380px; margin: 14vh auto 0; padding: 32px; background: var(--paper-card); border: 2px solid var(--ink); display: flex; flex-direction: column; gap: 16px; }
+.login h1 { margin: 0; font-size: 24px; }
+.login label { font-family: var(--mono); font-size: 13px; }
+.login input { min-height: 48px; padding: 0 14px; border: 1.5px solid var(--ink); background: #fff; font: inherit; font-size: 16px; }
+.error { margin: 0; color: #B91C1C; font-weight: 500; }
+</style>
+</head>
+<body>
+<form class="login" method="post" action="/admin/login">
+<h1>관리자 로그인 <span class="pen">✎</span></h1>
+<!--ERROR-->
+<label for="pw">비밀번호</label>
+<input id="pw" name="password" type="password" autocomplete="current-password" required autofocus>
+<button class="btn btn-dark" type="submit">로그인</button>
+<a href="/" class="back">← 사이트로 돌아가기</a>
+</form>
+</body>
+</html>

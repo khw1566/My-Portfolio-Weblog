@@ -1,0 +1,194 @@
+-- 초안 데이터. 관리자 페이지(/admin)에서 자유롭게 고치거나 지우세요.
+-- [대괄호] 부분은 직접 채워야 하는 자리입니다.
+
+-- ===== 모두에게 보이는 정보 (이름·학교 같은 개인정보는 넣지 마세요) =====
+INSERT INTO settings (key, value) VALUES
+  ('public_name', 'AUDREAMING'),
+  ('field', '기계설계 · 임베디드 · 설계 자동화'),
+  ('status', '==p:2027년 상반기 입사 가능=='),
+  ('tools', '[CAD 툴 예: SolidWorks · AutoCAD] · Python · Arduino/ESP32'),
+  ('drawing_no', 'PF-2026-REV.A'),
+  ('hero_title', '도면으로 ==설계==하고,
+코드로 ==검증==하는
+++기계공학도++입니다.'),
+  ('hero_note', '↳ 설계 + 코드 = 나의 강점!'),
+  ('hero_desc', '==m:CAD 설계와 임베디드·소프트웨어 프로젝트==를 함께 해왔습니다. 손으로 만든 결과물과 그 과정을 이곳에 기록합니다.'),
+  ('appeal_md', '- **도면을 읽고 그리는 사람** — 요구 조건에서 출발해 ==치수와 공차==까지 직접 정합니다.
+- **반복 작업은 코드로** — 기어 계산처럼 손으로 하던 일을 ++프로그램으로++ 바꿔 왔습니다.
+- **직접 만들어 확인** — ESP32·센서로 시제품을 만들어 ==m:동작으로 검증==합니다.'),
+  ('appeal_note', '현장에서 바로 배우고 바로 써먹겠습니다!'),
+  ('cad_note', '← 제일 보여주고 싶은 것'),
+  ('github', 'https://github.com/khw1566'),
+  ('quiz_question', '인사담당자이신가요? 제 이름이 뭘까요?'),
+
+-- ===== 인사담당자 전용 정보 (퀴즈를 맞힌 사람과 관리자만 볼 수 있음) =====
+  ('quiz_answer', ''),  -- 공개 저장소에 실명이 남지 않도록 비워 둡니다. 관리자 페이지에서 입력하세요.
+  ('name', '[이름]'),
+  ('email', '[이메일 주소]'),
+  ('phone', '[전화번호]'),
+  ('school', '[학교 · 학과]'),
+  ('graduation', '==p:[졸업 예정 연월]=='),
+  ('certificates', '[예: 기계설계산업기사 · 전산응용기계제도기능사]'),
+  ('about', '도면 한 장이 실제 부품이 되기까지의 과정을 좋아합니다. ==설계 의도를 숫자로 설명할 수 있는 엔지니어==가 되는 것이 목표입니다. [자기소개를 자유롭게 고쳐주세요]'),
+  ('about_note', '편하게 연락 주세요 :)'),
+  ('resume_md', '### 학력
+| 기간 | 학교 | 비고 |
+| --- | --- | --- |
+| [YYYY.MM – YYYY.MM] | [대학교 학과] | 졸업 예정 · 학점 [  /4.5] |
+| [YYYY.MM – YYYY.MM] | [고등학교] | 졸업 |
+
+### 경력 · 실습
+| 기간 | 내용 |
+| --- | --- |
+| [YYYY.MM – YYYY.MM] | [현장실습 / 아르바이트 / 동아리 등] |
+
+### 자격증
+| 취득일 | 자격 | 발급 기관 |
+| --- | --- | --- |
+| [YYYY.MM] | [자격증 이름] | 한국산업인력공단 |
+
+### 수상 · 교육
+- [수상 내역 또는 교육 이수]');
+
+-- 프로젝트: CAD 설계 (예시 자리)
+INSERT INTO posts (slug, category, code, title, summary, body_md, tools, year, badge, sort_order) VALUES
+('cad-project-1', 'project', 'DWG-001', '[CAD 프로젝트 1 제목]',
+ '예) 1단 평기어 감속기 설계. ==요구 감속비에서 출발해== 모듈, 잇수, 축 지름을 정하고 3D 모델과 부품도까지 작성했습니다.',
+ '## 설계 목표
+
+[무엇을, 왜 설계했는지 적어주세요. 예: 입력 회전수 1,750rpm을 1/5로 줄이는 감속기]
+
+## 설계 과정
+
+1. 요구 조건 정리: [감속비, 토크, 크기 제한]
+2. 기어 사양 결정: [모듈, 잇수, 압력각]
+3. 축과 베어링 선정: [축 지름, 베어링 번호]
+4. 3D 모델링과 조립: [사용 툴]
+
+![조립도 이미지를 여기에 올려주세요](/images/example.png)
+
+## 결과와 배운 점
+
+- ++간섭 검사++에서 [발견한 문제]를 고쳤습니다.
+- !!다음엔 공차를 더 꼼꼼히!!',
+ '[툴]', '[연도]', 'BEST ★', 1),
+('cad-project-2', 'project', 'DWG-002', '[CAD 프로젝트 2 제목]',
+ '예) 지그·고정구 설계. 가공 공정을 고려해 ==m:공차와 끼워맞춤==을 지정하고, 조립도와 부품표(BOM)를 정리했습니다.',
+ '## 설계 목표
+
+[내용을 적어주세요]',
+ '[툴]', '[연도]', '', 2),
+('cad-project-3', 'project', 'DWG-003', '[CAD 프로젝트 3 제목]',
+ '예) 기구 메커니즘 모델링. ==p:조립 구속과 간섭 검사==로 동작 범위를 확인하고, 시제품 제작을 위한 출력 파일을 준비했습니다.',
+ '## 설계 목표
+
+[내용을 적어주세요]',
+ '[툴]', '[연도]', '', 3);
+
+-- 프로젝트: GitHub 저장소
+INSERT INTO posts (slug, category, code, title, summary, body_md, tools, year, repo_url, pen_note, sort_order) VALUES
+('gear-design-assistant', 'project', 'S-01', 'Gear Design Assistant',
+ '기어 설계 계산을 돕는 프로그램. ==m:기계설계 지식을 코드로 옮긴== 대표 프로젝트',
+ '## 왜 만들었나
+
+기계요소설계 시간에 가장 많이 시간을 쓴 건 사실 설계가 아니라 ==계산==이었습니다. 값 하나를 바꾸면 그 뒤의 계산을 처음부터 다시 해야 했죠. 그래서 이 과정을 프로그램으로 만들어 보기로 했습니다.
+
+## 무엇을 하나
+
+- [입력값: 예) 동력, 회전수, 감속비]
+- [출력값: 예) 모듈, 잇수, 피치원 지름, 중심거리]
+- [추가 기능]
+
+## 어떻게 만들었나
+
+교재의 설계 공식을 정리해 ++입력 → 계산 → 결과 확인++ 흐름으로 구현했습니다. [사용 언어와 구조를 적어주세요]
+
+## 결과
+
+[계산 시간 단축, 오류 감소 등 실제로 달라진 점을 적어주세요]
+
+!!다음 목표: 강도 검토까지 자동화!!',
+ '설계 × SW', '2026', 'https://github.com/khw1566/Gear-Design-Assistant-Program', '★ 대표작, 꼭 보기!', 1),
+('esp32-mini-web-server', 'project', 'S-02', 'ESP32 Mini Web Server',
+ 'ESP32로 만든 소형 웹서버. [기능 한 줄 설명]',
+ '## 개요
+
+[내용을 적어주세요]', '임베디드', '2026', 'https://github.com/khw1566/ESP32-miniWebServer-Project', '', 2),
+('lab-qr-access', 'project', 'S-03', 'Lab QR Access',
+ 'QR 코드 기반 실습실 출입 관리. [기능 한 줄 설명]',
+ '## 개요
+
+[내용을 적어주세요]', '웹 · 시스템', '2026', 'https://github.com/khw1566/lab-qr-access', '', 3),
+('fc-simulation', 'project', 'S-04', 'FC Simulation',
+ '[시뮬레이션 대상과 목적 한 줄 설명]',
+ '## 개요
+
+[내용을 적어주세요]', '시뮬레이션', '2026', 'https://github.com/khw1566/FC_Simulation', '', 4),
+('usb-cam-app', 'project', 'S-05', 'USB CAM APP',
+ 'USB 카메라 활용 앱. [기능 한 줄 설명]',
+ '## 개요
+
+[내용을 적어주세요]', '앱', '2026', 'https://github.com/khw1566/USB-CAM-APP', '', 5);
+
+-- 미니 프로젝트 (심심풀이로 가볍게 만든 것)
+INSERT INTO posts (slug, category, code, title, summary, body_md, tools, year, repo_url, sort_order) VALUES
+('nopeeking-app', 'project', 'M-01', 'NoPeeking APP',
+ '[한 줄 설명]', '[내용을 적어주세요]', '앱', '2026', 'https://github.com/khw1566/NoPeeking-APP', 10),
+('ai-quota-ring', 'project', 'M-02', 'AI Quota Ring',
+ '[한 줄 설명]', '[내용을 적어주세요]', '[분류]', '2026', 'https://github.com/khw1566/AI-quota-ring', 11);
+
+-- 분야(fields)와 규모(scale). 저장소 이름만 보고 추측해서 넣었으니 관리자 페이지에서 고쳐 주세요.
+-- 분야 키: 3d=3D 설계, circuit=회로 설계, kinematics=기구학, embedded=임베디드, web=웹, mobile=모바일 앱, aero=항공
+UPDATE posts SET fields = '3d,kinematics' WHERE slug IN ('cad-project-1', 'cad-project-3');
+UPDATE posts SET fields = '3d' WHERE slug = 'cad-project-2';
+UPDATE posts SET fields = 'kinematics' WHERE slug = 'gear-design-assistant';
+UPDATE posts SET fields = 'embedded,web' WHERE slug = 'esp32-mini-web-server';
+UPDATE posts SET fields = 'web' WHERE slug = 'lab-qr-access';
+UPDATE posts SET fields = 'aero' WHERE slug = 'fc-simulation';
+UPDATE posts SET fields = 'mobile', scale = 'mini' WHERE slug IN ('usb-cam-app', 'nopeeking-app');
+UPDATE posts SET scale = 'mini' WHERE slug = 'ai-quota-ring';
+UPDATE posts SET code = 'M-03' WHERE slug = 'usb-cam-app';
+
+-- 설계 노트 (블로그 글)
+INSERT INTO posts (slug, category, title, summary, body_md, tools, year, sort_order) VALUES
+('why-gear-program', 'note', '기어 설계 계산을 ++프로그램으로++ 만든 이유',
+ '수업에서 반복하던 모듈·잇수 계산을 자동화하며 배운 점을 정리했습니다.',
+ '기어 설계 과제를 할 때마다 같은 계산을 반복했습니다. 이 글에서는 그 계산을 ==프로그램으로 옮기며 배운 점==을 정리합니다.
+
+## 손계산의 문제
+
+[느꼈던 불편함을 적어주세요]
+
+## 코드로 옮기며 배운 것
+
+[배운 점을 적어주세요]
+
+관련 저장소: [Gear-Design-Assistant-Program](https://github.com/khw1566/Gear-Design-Assistant-Program)',
+ '기어설계', '2026.11', 1),
+('esp32-web-monitor', 'note', 'ESP32로 장비 상태를 웹에서 보기',
+ '[글 요약을 한두 문장으로 적어주세요]',
+ '[본문을 적어주세요]', '임베디드', '2026.10', 2),
+('cad-retrospective', 'note', '[CAD 작업 회고 글 제목]',
+ '[글 요약을 한두 문장으로 적어주세요]',
+ '[본문을 적어주세요]', 'CAD', '[날짜]', 3);
+
+-- 인사담당자 전용 글 예시 (퀴즈를 맞혀야 목록에 보이고 열립니다)
+INSERT INTO posts (slug, category, title, summary, body_md, tools, year, sort_order, audience) VALUES
+('job-fit', 'note', '[지원 직무]에 맞는 이유',
+ '직무 역량과 프로젝트 경험을 연결해 정리한 인사담당자용 글입니다.',
+ '## 지원 동기
+
+[회사와 직무를 고른 이유]
+
+## 직무와 연결되는 경험
+
+| 직무 역량 | 관련 경험 |
+| --- | --- |
+| 도면 해독 · 작성 | CAD 프로젝트 DWG-001 ~ 003 |
+| 설계 계산 | ==Gear Design Assistant== |
+| 문제 해결 | [경험] |
+
+## 입사 후 목표
+
+!![한 줄 다짐]!!',
+ '자기소개', '2026.11', 0, 'hr');
