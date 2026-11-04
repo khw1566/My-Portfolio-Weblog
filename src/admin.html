@@ -1,0 +1,422 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>블로그 관리</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+KR:wght@400;500;700&family=Nanum+Pen+Script&display=swap">
+<link rel="stylesheet" href="/styles.css">
+<style>
+body { background-image: none; }
+.admin { max-width: 1400px; margin: 0 auto; padding: 0 20px 80px; }
+.bar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: space-between; padding: 16px 0; border-bottom: 2px solid var(--ink); }
+.bar h1 { margin: 0; font-size: 20px; font-family: var(--mono); }
+.row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.btn-sm { min-height: 40px; padding: 0 14px; font-size: 14px; }
+.btn-danger { border-color: #B91C1C; color: #B91C1C; }
+.tabs { display: flex; gap: 4px; margin: 20px 0; }
+.tabs button { min-height: 44px; padding: 0 18px; border: 1.5px solid var(--ink); background: transparent; font: inherit; cursor: pointer; }
+.tabs button[aria-selected="true"] { background: var(--ink); color: var(--paper); }
+.layout { display: flex; flex-wrap: wrap; gap: 24px; align-items: flex-start; }
+.list { flex: 1 1 280px; max-width: 100%; display: flex; flex-direction: column; gap: 20px; }
+.list h2 { margin: 0 0 6px; font-size: 13px; font-family: var(--mono); color: var(--muted); }
+.list ul { list-style: none; margin: 0; padding: 0; border: 2px solid var(--ink); background: var(--paper-card); }
+.list li + li { border-top: 1px solid var(--line); }
+.list li button { display: flex; gap: 10px; width: 100%; min-height: 44px; padding: 10px 12px; border: 0; background: transparent; text-align: left; font: inherit; font-size: 14px; cursor: pointer; }
+.list li button:hover, .list li button[aria-current="true"] { background: #FFF6C2; }
+.list .code { font-family: var(--mono); color: var(--accent); font-size: 12px; min-width: 56px; padding-top: 2px; }
+.list .draft { font-family: var(--mono); font-size: 11px; color: var(--muted); border: 1px solid var(--line); padding: 0 4px; align-self: flex-start; }
+.editor { flex: 999 1 640px; min-width: 0; display: flex; flex-direction: column; gap: 16px; }
+.fields { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px 16px; }
+.field { display: flex; flex-direction: column; gap: 4px; }
+.field.wide { grid-column: 1 / -1; }
+.field label { font-family: var(--mono); font-size: 12px; color: var(--ink-soft); }
+.field .hint { font-size: 12px; color: var(--muted); }
+.field input, .field select, .field textarea { min-height: 42px; padding: 8px 12px; border: 1.5px solid var(--ink); background: #fff; font: inherit; font-size: 15px; color: var(--ink); }
+.field textarea { resize: vertical; line-height: 1.6; }
+.check { flex-direction: row; align-items: center; gap: 8px; min-height: 42px; }
+.check input { width: 20px; height: 20px; min-height: 0; }
+.toolbar { display: flex; flex-wrap: wrap; gap: 4px; padding: 6px; border: 1.5px solid var(--ink); border-bottom: 0; background: var(--paper-card); }
+.toolbar button { min-height: 36px; padding: 0 10px; border: 1px solid var(--line); background: #fff; font: inherit; font-size: 13px; cursor: pointer; }
+.toolbar button:hover { border-color: var(--ink); }
+.split { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px; }
+#body { min-height: 520px; font-family: var(--mono); font-size: 14px; width: 100%; padding: 12px; border: 1.5px solid var(--ink); background: #fff; line-height: 1.7; resize: vertical; }
+#body.drag { outline: 3px dashed var(--accent); outline-offset: -6px; }
+.preview { min-height: 520px; padding: 4px 24px; border: 1.5px dashed var(--line); background: var(--paper); overflow: auto; }
+.preview .prose { padding: 12px 0; }
+.cover-row { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+.cover-row img { height: 72px; border: 1.5px solid var(--ink); }
+.toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); padding: 12px 20px; background: var(--ink); color: var(--paper); font-size: 14px; opacity: 0; transition: opacity .2s; pointer-events: none; z-index: 10; }
+.toast.show { opacity: 1; }
+.toast.err { background: #B91C1C; }
+.cheat { font-size: 13px; color: var(--ink-soft); line-height: 1.9; }
+.cheat code { font-family: var(--mono); background: #E9E7DF; padding: 1px 5px; }
+[hidden] { display: none !important; }
+</style>
+</head>
+<body>
+<div class="admin">
+<div class="bar">
+<h1>✎ 블로그 관리</h1>
+<div class="row">
+<a class="btn btn-sm" href="/" target="_blank" rel="noopener">사이트 보기</a>
+<form method="post" action="/admin/logout"><button class="btn btn-sm" type="submit">로그아웃</button></form>
+</div>
+</div>
+
+<div class="tabs" role="tablist">
+<button type="button" role="tab" id="tab-posts" aria-selected="true">글 관리</button>
+<button type="button" role="tab" id="tab-settings" aria-selected="false">프로필 · 첫 화면</button>
+</div>
+
+<!-- ===== 글 관리 ===== -->
+<section id="panel-posts" class="layout">
+<div class="list">
+<button class="btn btn-dark" type="button" id="new-post">+ 새 글 쓰기</button>
+<div><h2>01 CAD 설계</h2><ul id="list-cad"></ul></div>
+<div><h2>02 소프트웨어 · 임베디드</h2><ul id="list-software"></ul></div>
+<div><h2>03 설계 노트</h2><ul id="list-note"></ul></div>
+</div>
+
+<form class="editor" id="post-form" autocomplete="off">
+<div class="fields">
+<div class="field wide"><label for="f-title">제목</label><input id="f-title" name="title" required></div>
+<div class="field"><label for="f-category">분류</label>
+<select id="f-category" name="category"><option value="cad">CAD 설계</option><option value="software">소프트웨어 · 임베디드</option><option value="note">설계 노트</option></select></div>
+<div class="field"><label for="f-slug">주소 (영문/숫자/-)</label><input id="f-slug" name="slug" required placeholder="gear-reducer"><span class="hint" id="slug-hint"></span></div>
+<div class="field"><label for="f-code">번호 (예: DWG-004, S-06)</label><input id="f-code" name="code"></div>
+<div class="field"><label for="f-tools">툴 / 분류 태그</label><input id="f-tools" name="tools" placeholder="SolidWorks"></div>
+<div class="field"><label for="f-year">연도 / 날짜</label><input id="f-year" name="year" placeholder="2026.11"></div>
+<div class="field"><label for="f-sort">순서 (작을수록 앞)</label><input id="f-sort" name="sort_order" type="number"></div>
+<div class="field wide"><label for="f-summary">한두 줄 소개 (카드·목록에 표시)</label><textarea id="f-summary" name="summary" rows="2"></textarea></div>
+<div class="field"><label for="f-repo">GitHub 주소</label><input id="f-repo" name="repo_url" placeholder="https://github.com/khw1566/..."></div>
+<div class="field"><label for="f-badge">포스트잇 문구 (CAD 카드)</label><input id="f-badge" name="badge" placeholder="BEST ★"></div>
+<div class="field"><label for="f-pen">펜 메모 (소프트웨어 표)</label><input id="f-pen" name="pen_note" placeholder="★ 대표작, 꼭 보기!"></div>
+<div class="field check"><input id="f-published" name="published" type="checkbox"><label for="f-published">공개하기</label></div>
+<div class="field wide">
+<label>대표 이미지</label>
+<div class="cover-row">
+<img id="cover-img" alt="" hidden>
+<input id="f-cover" name="cover_url" placeholder="/images/..." style="flex: 1 1 240px">
+<label class="btn btn-sm" for="cover-file" style="cursor: pointer">이미지 올리기</label>
+<input id="cover-file" type="file" accept="image/*" hidden>
+</div>
+</div>
+</div>
+
+<div>
+<div class="toolbar" aria-label="본문 서식">
+<button type="button" data-wrap="==|==">형광펜 노랑</button>
+<button type="button" data-wrap="==m:|==">형광펜 민트</button>
+<button type="button" data-wrap="==p:|==">형광펜 분홍</button>
+<button type="button" data-wrap="++|++">손그림 밑줄</button>
+<button type="button" data-wrap="!!|!!">펜 메모</button>
+<button type="button" data-wrap="**|**">굵게</button>
+<button type="button" data-line="## ">소제목</button>
+<button type="button" data-line="- ">목록</button>
+<button type="button" data-line="> ">인용</button>
+<button type="button" id="img-btn">이미지 넣기</button>
+<input id="img-file" type="file" accept="image/*,application/pdf" multiple hidden>
+</div>
+<div class="split">
+<textarea id="body" name="body_md" aria-label="본문 (마크다운)" placeholder="본문을 마크다운으로 작성하세요. 이미지는 끌어다 놓거나 붙여넣기(Ctrl+V)하면 올라갑니다."></textarea>
+<div class="preview" aria-label="미리보기"><div class="prose" id="preview"></div></div>
+</div>
+</div>
+
+<div class="row" style="justify-content: space-between">
+<div class="row">
+<button class="btn btn-dark" type="submit">저장</button>
+<a class="btn" id="view-link" href="#" target="_blank" rel="noopener" hidden>글 보기</a>
+</div>
+<button class="btn btn-danger" type="button" id="delete-post" hidden>삭제</button>
+</div>
+
+<p class="cheat">필기 문법: <code>==노랑==</code> <code>==m:민트==</code> <code>==p:분홍==</code> 형광펜 · <code>++밑줄++</code> 손그림 밑줄 · <code>!!메모!!</code> 파란 펜 메모. 제목과 소개에도 쓸 수 있어요.</p>
+</form>
+</section>
+
+<!-- ===== 프로필 ===== -->
+<section id="panel-settings" hidden>
+<form class="editor" id="settings-form" style="max-width: 900px">
+<div class="fields">
+<div class="field"><label for="s-name">이름</label><input id="s-name" name="name"></div>
+<div class="field"><label for="s-email">이메일</label><input id="s-email" name="email"></div>
+<div class="field"><label for="s-school">학교 · 학과</label><input id="s-school" name="school"></div>
+<div class="field"><label for="s-graduation">졸업</label><input id="s-graduation" name="graduation"></div>
+<div class="field wide"><label for="s-tools">사용 툴</label><input id="s-tools" name="tools"></div>
+<div class="field"><label for="s-github">GitHub 주소</label><input id="s-github" name="github"></div>
+<div class="field"><label for="s-drawing_no">도면번호 (장식)</label><input id="s-drawing_no" name="drawing_no"></div>
+<div class="field wide"><label for="s-certificates">자격증</label><input id="s-certificates" name="certificates"></div>
+<div class="field wide"><label for="s-hero_title">첫 화면 큰 제목 (줄바꿈 그대로 반영)</label><textarea id="s-hero_title" name="hero_title" rows="3"></textarea></div>
+<div class="field wide"><label for="s-hero_note">첫 화면 펜 메모</label><input id="s-hero_note" name="hero_note"></div>
+<div class="field wide"><label for="s-hero_desc">첫 화면 소개 문단</label><textarea id="s-hero_desc" name="hero_desc" rows="3"></textarea></div>
+<div class="field wide"><label for="s-cad_note">CAD 섹션 펜 메모</label><input id="s-cad_note" name="cad_note"></div>
+<div class="field wide"><label for="s-about">자기소개</label><textarea id="s-about" name="about" rows="4"></textarea></div>
+<div class="field wide"><label for="s-about_note">자기소개 아래 펜 메모</label><input id="s-about_note" name="about_note"></div>
+</div>
+<div class="row"><button class="btn btn-dark" type="submit">프로필 저장</button></div>
+<p class="cheat">필기 문법: <code>==노랑==</code> <code>==m:민트==</code> <code>==p:분홍==</code> · <code>++밑줄++</code> · <code>!!메모!!</code></p>
+</form>
+</section>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(() => {
+  const $ = (s) => document.querySelector(s);
+  const form = $('#post-form');
+  const body = $('#body');
+  let current = null; // 편집 중인 글 id (null = 새 글)
+  let dirty = false;
+
+  function toast(msg, err) {
+    const t = $('#toast');
+    t.textContent = msg;
+    t.className = 'toast show' + (err ? ' err' : '');
+    clearTimeout(toast.t);
+    toast.t = setTimeout(() => (t.className = 'toast'), 2600);
+  }
+
+  async function api(path, opts = {}) {
+    const res = await fetch('/api/admin' + path, {
+      ...opts,
+      headers: opts.body instanceof FormData ? {} : { 'Content-Type': 'application/json' },
+    });
+    if (res.status === 401) { location.reload(); throw new Error('로그인이 필요합니다.'); }
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || '오류가 발생했습니다.');
+    return data;
+  }
+
+  // ----- 탭 -----
+  function showTab(name) {
+    $('#tab-posts').setAttribute('aria-selected', name === 'posts');
+    $('#tab-settings').setAttribute('aria-selected', name === 'settings');
+    $('#panel-posts').hidden = name !== 'posts';
+    $('#panel-settings').hidden = name !== 'settings';
+  }
+  $('#tab-posts').onclick = () => showTab('posts');
+  $('#tab-settings').onclick = () => { showTab('settings'); loadSettings(); };
+
+  // ----- 글 목록 -----
+  async function loadList() {
+    const posts = await api('/posts');
+    for (const cat of ['cad', 'software', 'note']) {
+      const ul = $('#list-' + cat);
+      ul.replaceChildren();
+      for (const p of posts.filter((x) => x.category === cat)) {
+        const li = document.createElement('li');
+        const b = document.createElement('button');
+        b.type = 'button';
+        if (p.id === current) b.setAttribute('aria-current', 'true');
+        const code = document.createElement('span');
+        code.className = 'code';
+        code.textContent = p.code || '—';
+        const title = document.createElement('span');
+        title.style.flex = '1';
+        title.textContent = p.title.replace(/==(?:[ymp]:)?|\+\+|!!/g, '');
+        b.append(code, title);
+        if (!p.published) {
+          const d = document.createElement('span');
+          d.className = 'draft';
+          d.textContent = '비공개';
+          b.append(d);
+        }
+        b.onclick = () => openPost(p.id);
+        li.append(b);
+        ul.append(li);
+      }
+    }
+  }
+
+  function fill(p) {
+    for (const el of form.elements) {
+      if (!el.name) continue;
+      if (el.type === 'checkbox') el.checked = !!p[el.name];
+      else el.value = p[el.name] ?? '';
+    }
+    updateCover();
+    $('#delete-post').hidden = !p.id;
+    $('#view-link').hidden = !p.id;
+    $('#view-link').href = '/posts/' + encodeURIComponent(p.slug || '');
+    $('#slug-hint').textContent = p.slug ? '주소: /posts/' + p.slug : '';
+    dirty = false;
+    preview();
+  }
+
+  async function openPost(id) {
+    if (dirty && !confirm('저장하지 않은 내용이 있습니다. 다른 글을 열까요?')) return;
+    const p = await api('/posts/' + id);
+    current = p.id;
+    fill(p);
+    loadList();
+  }
+
+  function newPost() {
+    if (dirty && !confirm('저장하지 않은 내용이 있습니다. 새 글을 쓸까요?')) return;
+    current = null;
+    fill({ category: 'note', published: 1, sort_order: 0, year: new Date().toISOString().slice(0, 7).replace('-', '.') });
+    loadList();
+    $('#f-title').focus();
+  }
+  $('#new-post').onclick = newPost;
+
+  // 제목으로 주소(slug) 자동 제안
+  $('#f-title').addEventListener('input', () => {
+    if (current === null && !$('#f-slug').dataset.touched) {
+      $('#f-slug').value = $('#f-title').value.toLowerCase().replace(/==(?:[ymp]:)?|\+\+|!!/g, '').replace(/[^a-z0-9가-힣]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 60);
+    }
+  });
+  $('#f-slug').addEventListener('input', () => ($('#f-slug').dataset.touched = '1'));
+  form.addEventListener('input', () => (dirty = true));
+  window.addEventListener('beforeunload', (e) => { if (dirty) e.preventDefault(); });
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const data = {};
+    for (const el of form.elements) {
+      if (!el.name) continue;
+      data[el.name] = el.type === 'checkbox' ? el.checked : el.value;
+    }
+    try {
+      if (current === null) {
+        const r = await api('/posts', { method: 'POST', body: JSON.stringify(data) });
+        current = r.id;
+      } else {
+        await api('/posts/' + current, { method: 'PUT', body: JSON.stringify(data) });
+      }
+      dirty = false;
+      delete $('#f-slug').dataset.touched;
+      toast('저장했습니다.');
+      const p = await api('/posts/' + current);
+      fill(p);
+      loadList();
+    } catch (err) { toast(err.message, true); }
+  });
+
+  $('#delete-post').onclick = async () => {
+    if (current === null || !confirm('이 글을 삭제할까요? 되돌릴 수 없습니다.')) return;
+    try {
+      await api('/posts/' + current, { method: 'DELETE' });
+      toast('삭제했습니다.');
+      dirty = false;
+      newPost();
+    } catch (err) { toast(err.message, true); }
+  };
+
+  // ----- 서식 버튼 -----
+  function wrapSel(before, after) {
+    const { selectionStart: s, selectionEnd: e, value } = body;
+    const sel = value.slice(s, e) || '텍스트';
+    body.setRangeText(before + sel + after, s, e, 'end');
+    body.setSelectionRange(s + before.length, s + before.length + sel.length);
+    body.focus();
+    dirty = true;
+    preview();
+  }
+  function prefixLine(prefix) {
+    const s = body.selectionStart;
+    const lineStart = body.value.lastIndexOf('\n', s - 1) + 1;
+    body.setRangeText(prefix, lineStart, lineStart, 'end');
+    body.focus();
+    dirty = true;
+    preview();
+  }
+  document.querySelectorAll('.toolbar [data-wrap]').forEach((b) => {
+    const [a, z] = b.dataset.wrap.split('|');
+    b.onclick = () => wrapSel(a, z);
+  });
+  document.querySelectorAll('.toolbar [data-line]').forEach((b) => (b.onclick = () => prefixLine(b.dataset.line)));
+
+  // ----- 미리보기 -----
+  let pt;
+  function preview() {
+    clearTimeout(pt);
+    pt = setTimeout(async () => {
+      try {
+        const { html } = await api('/preview', { method: 'POST', body: JSON.stringify({ md: body.value }) });
+        $('#preview').innerHTML = html;
+      } catch (err) { /* 미리보기 실패는 무시 */ }
+    }, 300);
+  }
+  body.addEventListener('input', preview);
+
+  // ----- 이미지 업로드 -----
+  async function upload(file) {
+    const fd = new FormData();
+    fd.append('file', file);
+    toast('올리는 중… ' + file.name);
+    const r = await api('/images', { method: 'POST', body: fd });
+    toast('올렸습니다.');
+    return r;
+  }
+  async function insertFiles(files) {
+    for (const f of files) {
+      try {
+        const r = await upload(f);
+        const alt = f.name.replace(/\.[^.]+$/, '');
+        const md = r.type === 'application/pdf' ? `[${alt} (PDF 도면)](${r.url})` : `![${alt}](${r.url})`;
+        body.setRangeText('\n' + md + '\n', body.selectionStart, body.selectionEnd, 'end');
+        dirty = true;
+      } catch (err) { toast(err.message, true); }
+    }
+    preview();
+  }
+  $('#img-btn').onclick = () => $('#img-file').click();
+  $('#img-file').onchange = (e) => { insertFiles([...e.target.files]); e.target.value = ''; };
+  body.addEventListener('dragover', (e) => { e.preventDefault(); body.classList.add('drag'); });
+  body.addEventListener('dragleave', () => body.classList.remove('drag'));
+  body.addEventListener('drop', (e) => {
+    e.preventDefault();
+    body.classList.remove('drag');
+    const files = [...e.dataTransfer.files];
+    if (files.length) insertFiles(files);
+  });
+  body.addEventListener('paste', (e) => {
+    const files = [...e.clipboardData.files];
+    if (files.length) { e.preventDefault(); insertFiles(files); }
+  });
+
+  function updateCover() {
+    const v = $('#f-cover').value.trim();
+    $('#cover-img').hidden = !v;
+    if (v) $('#cover-img').src = v;
+  }
+  $('#f-cover').addEventListener('input', updateCover);
+  $('#cover-file').onchange = async (e) => {
+    const f = e.target.files[0];
+    e.target.value = '';
+    if (!f) return;
+    try {
+      const r = await upload(f);
+      $('#f-cover').value = r.url;
+      dirty = true;
+      updateCover();
+    } catch (err) { toast(err.message, true); }
+  };
+
+  // ----- 프로필 -----
+  const sform = $('#settings-form');
+  async function loadSettings() {
+    const s = await api('/settings');
+    for (const el of sform.elements) if (el.name) el.value = s[el.name] ?? '';
+  }
+  sform.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const data = {};
+    for (const el of sform.elements) if (el.name) data[el.name] = el.value;
+    try {
+      await api('/settings', { method: 'PUT', body: JSON.stringify(data) });
+      toast('프로필을 저장했습니다.');
+    } catch (err) { toast(err.message, true); }
+  });
+
+  // 시작
+  loadList().then(() => newPost()).catch((err) => toast(err.message, true));
+})();
+</script>
+</body>
+</html>

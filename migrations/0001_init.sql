@@ -1,0 +1,29 @@
+-- 글(프로젝트, 설계 노트) 테이블
+CREATE TABLE posts (
+  id          INTEGER PRIMARY KEY AUTOINCREMENT,
+  slug        TEXT NOT NULL UNIQUE,              -- 주소에 쓰이는 이름 (예: gear-design)
+  category    TEXT NOT NULL DEFAULT 'note'       -- cad | software | note
+              CHECK (category IN ('cad', 'software', 'note')),
+  code        TEXT NOT NULL DEFAULT '',          -- 도면번호 스타일 표기 (예: DWG-001, S-01)
+  title       TEXT NOT NULL,
+  summary     TEXT NOT NULL DEFAULT '',          -- 카드/목록에 보이는 한두 줄 소개
+  body_md     TEXT NOT NULL DEFAULT '',          -- 본문 (마크다운)
+  cover_url   TEXT NOT NULL DEFAULT '',          -- 대표 이미지 주소
+  tools       TEXT NOT NULL DEFAULT '',          -- 사용 툴 / 분류 (예: SolidWorks)
+  year        TEXT NOT NULL DEFAULT '',          -- 연도 또는 날짜 (예: 2026, 2026.11)
+  repo_url    TEXT NOT NULL DEFAULT '',          -- GitHub 저장소 주소
+  badge       TEXT NOT NULL DEFAULT '',          -- 손글씨 포스트잇 문구 (예: BEST ★)
+  pen_note    TEXT NOT NULL DEFAULT '',          -- 목록 옆 파란 펜 메모 (예: ★ 대표작, 꼭 보기!)
+  sort_order  INTEGER NOT NULL DEFAULT 0,        -- 작은 숫자가 먼저 보임
+  published   INTEGER NOT NULL DEFAULT 1,        -- 1 = 공개, 0 = 비공개(임시저장)
+  created_at  TEXT NOT NULL DEFAULT (datetime('now')),
+  updated_at  TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+CREATE INDEX idx_posts_category ON posts (category, published, sort_order);
+
+-- 프로필/소개 같은 사이트 설정 (key-value)
+CREATE TABLE settings (
+  key   TEXT PRIMARY KEY,
+  value TEXT NOT NULL DEFAULT ''
+);
