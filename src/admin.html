@@ -93,7 +93,9 @@ body { background-image: none; }
 <div class="field"><label for="f-repo">GitHub 주소</label><input id="f-repo" name="repo_url" placeholder="https://github.com/khw1566/..."></div>
 <div class="field"><label for="f-badge">포스트잇 문구 (CAD 카드)</label><input id="f-badge" name="badge" placeholder="BEST ★"></div>
 <div class="field"><label for="f-pen">펜 메모 (소프트웨어 표)</label><input id="f-pen" name="pen_note" placeholder="★ 대표작, 꼭 보기!"></div>
-<div class="field check"><input id="f-published" name="published" type="checkbox"><label for="f-published">공개하기</label></div>
+<div class="field"><label for="f-audience">공개 범위</label>
+<select id="f-audience" name="audience"><option value="public">모든 방문자</option><option value="hr">인사담당자만 (퀴즈 통과)</option></select></div>
+<div class="field check"><input id="f-published" name="published" type="checkbox"><label for="f-published">게시하기 (끄면 임시저장)</label></div>
 <div class="field wide">
 <label>대표 이미지</label>
 <div class="cover-row">
@@ -140,22 +142,35 @@ body { background-image: none; }
 <!-- ===== 프로필 ===== -->
 <section id="panel-settings" hidden>
 <form class="editor" id="settings-form" style="max-width: 900px">
-<div class="fields">
-<div class="field"><label for="s-name">이름</label><input id="s-name" name="name"></div>
-<div class="field"><label for="s-email">이메일</label><input id="s-email" name="email"></div>
-<div class="field"><label for="s-school">학교 · 학과</label><input id="s-school" name="school"></div>
-<div class="field"><label for="s-graduation">졸업</label><input id="s-graduation" name="graduation"></div>
-<div class="field wide"><label for="s-tools">사용 툴</label><input id="s-tools" name="tools"></div>
+<fieldset class="fields" style="border: 2px solid var(--ink); padding: 16px 20px 20px; margin: 0">
+<legend style="font-family: var(--mono); font-size: 13px; padding: 0 8px">모든 방문자에게 보이는 정보 · 이름이나 학교는 넣지 마세요</legend>
+<div class="field"><label for="s-public_name">사이트 표시 이름 (실명 대신)</label><input id="s-public_name" name="public_name"></div>
 <div class="field"><label for="s-github">GitHub 주소</label><input id="s-github" name="github"></div>
+<div class="field"><label for="s-field">관심 분야</label><input id="s-field" name="field"></div>
+<div class="field"><label for="s-status">상태 (예: 2027년 상반기 입사 가능)</label><input id="s-status" name="status"></div>
+<div class="field wide"><label for="s-tools">사용 툴</label><input id="s-tools" name="tools"></div>
 <div class="field"><label for="s-drawing_no">도면번호 (장식)</label><input id="s-drawing_no" name="drawing_no"></div>
-<div class="field wide"><label for="s-certificates">자격증</label><input id="s-certificates" name="certificates"></div>
+<div class="field"><label for="s-cad_note">CAD 섹션 펜 메모</label><input id="s-cad_note" name="cad_note"></div>
 <div class="field wide"><label for="s-hero_title">첫 화면 큰 제목 (줄바꿈 그대로 반영)</label><textarea id="s-hero_title" name="hero_title" rows="3"></textarea></div>
 <div class="field wide"><label for="s-hero_note">첫 화면 펜 메모</label><input id="s-hero_note" name="hero_note"></div>
 <div class="field wide"><label for="s-hero_desc">첫 화면 소개 문단</label><textarea id="s-hero_desc" name="hero_desc" rows="3"></textarea></div>
-<div class="field wide"><label for="s-cad_note">CAD 섹션 펜 메모</label><input id="s-cad_note" name="cad_note"></div>
+<div class="field wide"><label for="s-appeal_md">채용 어필 (마크다운 목록, 한 줄에 하나)</label><textarea id="s-appeal_md" name="appeal_md" rows="5"></textarea></div>
+<div class="field wide"><label for="s-appeal_note">채용 어필 아래 펜 메모</label><input id="s-appeal_note" name="appeal_note"></div>
+<div class="field wide"><label for="s-quiz_question">퀴즈 질문</label><input id="s-quiz_question" name="quiz_question"></div>
+</fieldset>
+<fieldset class="fields" style="border: 2px solid var(--pen); padding: 16px 20px 20px; margin: 0; background: #F5F8FF">
+<legend style="font-family: var(--mono); font-size: 13px; padding: 0 8px; color: var(--pen)">인사담당자 전용 · 퀴즈를 맞힌 사람만 보입니다</legend>
+<div class="field"><label for="s-quiz_answer">퀴즈 정답 (띄어쓰기 무시)</label><input id="s-quiz_answer" name="quiz_answer"></div>
+<div class="field"><label for="s-name">이름</label><input id="s-name" name="name"></div>
+<div class="field"><label for="s-email">이메일</label><input id="s-email" name="email"></div>
+<div class="field"><label for="s-phone">전화번호</label><input id="s-phone" name="phone"></div>
+<div class="field"><label for="s-school">학교 · 학과</label><input id="s-school" name="school"></div>
+<div class="field"><label for="s-graduation">졸업</label><input id="s-graduation" name="graduation"></div>
+<div class="field wide"><label for="s-certificates">자격증 (요약)</label><input id="s-certificates" name="certificates"></div>
 <div class="field wide"><label for="s-about">자기소개</label><textarea id="s-about" name="about" rows="4"></textarea></div>
 <div class="field wide"><label for="s-about_note">자기소개 아래 펜 메모</label><input id="s-about_note" name="about_note"></div>
-</div>
+<div class="field wide"><label for="s-resume_md">이력서 (학력 · 경력 · 자격증 · 수상, 마크다운 표 사용 가능)</label><textarea id="s-resume_md" name="resume_md" rows="16" style="font-family: var(--mono); font-size: 14px"></textarea></div>
+</fieldset>
 <div class="row"><button class="btn btn-dark" type="submit">프로필 저장</button></div>
 <p class="cheat">필기 문법: <code>==노랑==</code> <code>==m:민트==</code> <code>==p:분홍==</code> · <code>++밑줄++</code> · <code>!!메모!!</code></p>
 </form>
@@ -219,10 +234,11 @@ body { background-image: none; }
         title.style.flex = '1';
         title.textContent = p.title.replace(/==(?:[ymp]:)?|\+\+|!!/g, '');
         b.append(code, title);
-        if (!p.published) {
+        for (const [on, label] of [[!p.published, '임시'], [p.audience === 'hr', 'HR']]) {
+          if (!on) continue;
           const d = document.createElement('span');
           d.className = 'draft';
-          d.textContent = '비공개';
+          d.textContent = label;
           b.append(d);
         }
         b.onclick = () => openPost(p.id);
@@ -258,7 +274,7 @@ body { background-image: none; }
   function newPost() {
     if (dirty && !confirm('저장하지 않은 내용이 있습니다. 새 글을 쓸까요?')) return;
     current = null;
-    fill({ category: 'note', published: 1, sort_order: 0, year: new Date().toISOString().slice(0, 7).replace('-', '.') });
+    fill({ category: 'note', audience: 'public', published: 1, sort_order: 0, year: new Date().toISOString().slice(0, 7).replace('-', '.') });
     loadList();
     $('#f-title').focus();
   }

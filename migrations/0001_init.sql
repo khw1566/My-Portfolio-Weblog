@@ -15,7 +15,9 @@ CREATE TABLE posts (
   badge       TEXT NOT NULL DEFAULT '',          -- 손글씨 포스트잇 문구 (예: BEST ★)
   pen_note    TEXT NOT NULL DEFAULT '',          -- 목록 옆 파란 펜 메모 (예: ★ 대표작, 꼭 보기!)
   sort_order  INTEGER NOT NULL DEFAULT 0,        -- 작은 숫자가 먼저 보임
-  published   INTEGER NOT NULL DEFAULT 1,        -- 1 = 공개, 0 = 비공개(임시저장)
+  published   INTEGER NOT NULL DEFAULT 1,        -- 1 = 게시, 0 = 임시저장(나만 보기)
+  audience    TEXT NOT NULL DEFAULT 'public'     -- public = 모두 / hr = 인사담당자 퀴즈 통과자만
+              CHECK (audience IN ('public', 'hr')),
   created_at  TEXT NOT NULL DEFAULT (datetime('now')),
   updated_at  TEXT NOT NULL DEFAULT (datetime('now'))
 );
@@ -23,6 +25,7 @@ CREATE TABLE posts (
 CREATE INDEX idx_posts_category ON posts (category, published, sort_order);
 
 -- 프로필/소개 같은 사이트 설정 (key-value)
+-- 어떤 키가 인사담당자 전용인지는 src/index.js 의 PRIVATE_KEYS 에 적혀 있습니다.
 CREATE TABLE settings (
   key   TEXT PRIMARY KEY,
   value TEXT NOT NULL DEFAULT ''

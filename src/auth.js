@@ -37,21 +37,33 @@ export async function checkPassword(env, password) {
   return safeEqual(password, env.ADMIN_PASSWORD);
 }
 
-export async function makeSessionCookie(env, secure) {
+const COOKIES = { admin: COOKIE, hr: 'pf_hr' };
+const SAMESITE = { admin: 'Strict', hr: 'Lax' };
+
+/** scope: 'admin' = 관리자, 'hr' = 인사담당자 퀴즈 통과 */
+export async function makeSessionCookie(env, secure, scope = 'admin') {
   const exp = Math.floor(Date.now() / 1000) + MAX_AGE;
-  const token = `${exp}.${await hmac(secretOf(env), String(exp))}`;
-  return `${COOKIE}=${token}; Path=/; HttpOnly; SameSite=Strict; Max-Age=${MAX_AGE}${secure ? '; Secure' : ''}`;
+  const token = `${exp}.${await hmac(secretOf(env), scope + ':' + exp)}`;
+  return `${COOKIES[scope]}=${token}; Path=/; HttpOnly; SameSite=${SAMESITE[scope]}; Max-Age=${MAX_AGE}${secure ? '; Secure' : ''}`;
 }
 
-export function clearSessionCookie() {
-  return `${COOKIE}=; Path=/; HttpOnly; SameSite=Strict; Max-Age=0`;
+export function clearSessionCookie(scope = 'admin') {
+  return `${COOKIES[scope]}=; Path=/; HttpOnly; SameSite=${SAMESITE[scope]}; Max-Age=0`;
 }
 
-export async function isLoggedIn(request, env) {
+export async function hasSession(request, env, scope) {
   const cookie = request.headers.get('Cookie') || '';
-  const m = new RegExp(`(?:^|;\\s*)${COOKIE}=([^;]+)`).exec(cookie);
+  const m = new RegExp(`(?:^|;\\s*)${COOKIES[scope]}=([^;]+)`).exec(cookie);
   if (!m) return false;
   const [exp, sig] = m[1].split('.');
   if (!exp || !sig || Number(exp) < Date.now() / 1000) return false;
-  return safeEqual(sig, await hmac(secretOf(env), exp));
+  return safeEqual(sig, await hmac(secretOf(env), scope + ':' + exp));
+}
+
+export const isLoggedIn = (request, env) => hasSession(request, env, 'admin');
+
+/** 인사담당자 퀴즈 정답 비교: 띄어쓰기·대소문자 무시 */
+export function quizMatches(answer, expected) {
+  const norm = (x) => String(x || '').replace(/\s+/g, '').toLowerCase();
+  return !!norm(expected) && norm(answer) === norm(expected);
 }

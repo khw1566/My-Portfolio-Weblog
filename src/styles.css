@@ -164,3 +164,31 @@ mark { color: inherit; background: none; }
   .hero { padding: 48px 0 40px; }
   .section-head h2, .about-text h2 { font-size: 26px; }
 }
+
+/* ===== 채용 어필 · 인사담당자 퀴즈 ===== */
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); border: 0; }
+.appeal-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 32px; align-items: start; }
+.appeal ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 14px; counter-reset: appeal; }
+.appeal li { counter-increment: appeal; position: relative; padding: 16px 18px 16px 64px; background: var(--paper-card); border: 2px solid var(--ink); font-size: 16px; line-height: 1.7; color: var(--ink-soft); }
+.appeal li::before { content: counter(appeal, decimal-leading-zero); position: absolute; left: 18px; top: 16px; font-family: var(--mono); font-weight: 600; color: var(--accent); }
+.appeal li strong { color: var(--ink); }
+.appeal-note { margin: 16px 0 0 8px; font-size: 28px; }
+.quiz { position: relative; display: flex; flex-direction: column; gap: 12px; padding: 28px; background: #FFFDF2; border: 2px dashed var(--ink); }
+.quiz-open { border-style: solid; background: var(--paper-card); }
+.quiz-sticky { top: -16px; right: 18px; }
+.quiz-q { margin: 0; font-size: 22px; font-weight: 700; line-height: 1.4; }
+.quiz-help { margin: 0; font-size: 15px; color: var(--ink-soft); }
+.quiz-row { display: flex; flex-wrap: wrap; gap: 8px; }
+.quiz-row input { flex: 1 1 160px; min-width: 0; width: 100%; min-height: 48px; padding: 0 14px; border: 1.5px solid var(--ink); background: #fff; font: inherit; font-size: 17px; }
+.quiz-error { margin: 0; color: #B91C1C; font-size: 15px; }
+.quiz-error .pen { color: #B91C1C; font-size: 24px; }
+.hr-bar { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 8px 16px; padding: 8px 16px; background: var(--ink); color: var(--paper); font-size: 14px; }
+.hr-bar span { display: inline-flex; align-items: center; gap: 8px; }
+.hr-bar button { min-height: 36px; padding: 0 12px; border: 1px solid var(--paper); background: transparent; color: var(--paper); font: inherit; font-size: 13px; cursor: pointer; }
+.hr-tag { display: inline-block; vertical-align: middle; padding: 1px 6px; border: 1.5px solid var(--pen); color: var(--pen); font-family: var(--mono); font-size: 11px; font-weight: 600; letter-spacing: .04em; transform: rotate(-2deg); }
+.title-block a, .btn svg { vertical-align: -3px; }
+.about-locked { grid-template-columns: 1fr; }
+.resume { padding: 0; }
+.resume h3:first-child { margin-top: 0; }
+.locked { max-width: 640px; }
+.locked h1 { display: flex; align-items: center; gap: 10px; font-size: 28px; margin: 0; }
