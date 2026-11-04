@@ -451,6 +451,7 @@ body { background-image: none; }
   async function loadSettings() {
     const s = await api('/settings');
     for (const el of sform.elements) if (el.name) el.value = s[el.name] ?? '';
+    if (!String(s.quiz_answer || '').trim()) toast('퀴즈 정답이 비어 있어서 아무도 인사담당자 모드를 열 수 없어요. 아래 파란 칸에 입력해 주세요.', true);
   }
   sform.addEventListener('submit', async (e) => {
     e.preventDefault();

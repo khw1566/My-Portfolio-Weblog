@@ -64,6 +64,6 @@ export const isLoggedIn = (request, env) => hasSession(request, env, 'admin');
 
 /** 인사담당자 퀴즈 정답 비교: 띄어쓰기·대소문자 무시 */
 export function quizMatches(answer, expected) {
-  const norm = (x) => String(x || '').replace(/\s+/g, '').toLowerCase();
+  const norm = (x) => String(x || '').normalize('NFC').replace(/[\s\u200B-\u200D\uFEFF]+/g, '').toLowerCase();
   return !!norm(expected) && norm(answer) === norm(expected);
 }
