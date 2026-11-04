@@ -211,3 +211,7 @@ mark { color: inherit; background: none; }
 .mini-head h3 { margin: 0; font-size: 20px; }
 .mini-head .pen { font-size: 24px; }
 .sw-kind .field-tags { flex-direction: column; align-items: flex-start; }
+
+/* 다이어그램(SVG)은 잘리지 않게 전체를 보여 줍니다 */
+.card-img img[src$=".svg"] { object-fit: contain; padding: 12px; background: #fff; }
+.prose img[src$=".svg"] { background: #fff; padding: 8px; }

@@ -299,7 +299,7 @@ export function postPage(s, p, view) {
 ${p.summary ? `<p class="lead">${renderInline(p.summary)}</p>` : ''}
 ${rows.length ? `<table class="post-sheet"><tbody>${rows.map(([k, v]) => `<tr><th scope="row">${k}</th><td>${v}</td></tr>`).join('')}</tbody></table>` : ''}
 </header>
-${p.cover_url ? `<figure class="post-cover"><img src="${esc(safeUrl(p.cover_url))}" alt=""></figure>` : ''}
+${p.cover_url && !String(p.body_md || '').includes(p.cover_url) ? `<figure class="post-cover"><img src="${esc(safeUrl(p.cover_url))}" alt=""></figure>` : ''}
 <div class="prose">${renderMarkdown(p.body_md)}</div>
 </article>`;
 

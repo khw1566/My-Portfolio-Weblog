@@ -9,6 +9,10 @@ routes = [
 ]
 
 # CSS / HTML 파일을 문자열로 불러오기
+# public/ 폴더의 파일(다이어그램 SVG 등)을 그대로 제공합니다. 예: public/diagrams/a.svg → /diagrams/a.svg
+[assets]
+directory = "public"
+
 [[rules]]
 type = "Text"
 globs = ["**/*.css", "**/*.html"]
